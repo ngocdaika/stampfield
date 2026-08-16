@@ -226,6 +226,26 @@ svg { display: block; }
 #shutter.rec i { background: var(--err); border-radius: 12px; width: 34px; height: 34px; }
 #flip { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 #flash-fx { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 45; }
+/* zoom presets (iOS-style pill above the mode row) */
+#zoom-row { position: absolute; left: 0; right: 0; bottom: calc(var(--safe-bottom) + 204px); display: flex; justify-content: center; z-index: 40; pointer-events: none; }
+#zoom-pill { display: flex; gap: 2px; padding: 3px; border-radius: 20px; pointer-events: auto; }
+#zoom-pill button { min-width: 34px; height: 30px; padding: 0 8px; border-radius: 15px; font: 600 12px var(--mono); color: rgba(255,255,255,.8); }
+#zoom-pill button.on { background: rgba(255,255,255,.16); color: #94bce3; font-weight: 700; }
+#zoom-pill button.hidden { display: none; }
+/* tap-to-focus box + exposure slider */
+#focus-box { position: absolute; width: 74px; height: 74px; margin: -37px 0 0 -37px; pointer-events: none; z-index: 35; opacity: 0; transition: opacity .25s; }
+#focus-box.show { opacity: 1; animation: focusin .28s ease-out; }
+#focus-box.dim { opacity: .55; }
+#focus-box i { position: absolute; inset: 0; border: 1.5px solid #f4d35e; border-radius: 4px; box-shadow: 0 0 0 1px rgba(0,0,0,.35); }
+#focus-box.locked i { border-color: #94bce3; }
+@keyframes focusin { 0% { transform: scale(1.35); } 100% { transform: scale(1); } }
+#ev-slider { position: absolute; left: 90px; top: -30px; height: 134px; width: 26px; display: flex; flex-direction: column; align-items: center; opacity: 0; transition: opacity .2s; }
+#focus-box.show #ev-slider { opacity: 1; }
+#focus-box.flip #ev-slider { left: auto; right: 90px; }
+#ev-slider b { flex: 1; width: 1.5px; background: rgba(255,255,255,.55); position: relative; }
+#ev-slider b::after { content: ""; position: absolute; left: 50%; top: var(--ev-y, 50%); width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: #f4d35e; box-shadow: 0 0 0 1px rgba(0,0,0,.4); }
+#ev-slider span { margin-top: 6px; font: 600 11px var(--mono); color: #f4d35e; text-shadow: 0 0 3px rgba(0,0,0,.6); }
+#ae-lock { position: absolute; top: calc(var(--safe-top) + 12px); left: 50%; transform: translateX(-50%); padding: 4px 9px; border-radius: 6px; background: #f4d35e; color: #1d1f20; font: 700 10.5px var(--mono); letter-spacing: .06em; z-index: 41; }
 #flash-fx.go { animation: flashfx .22s ease-out; }
 @keyframes flashfx { 0% { opacity: .85; } 100% { opacity: 0; } }
 #cam-banner { position: absolute; left: 12px; right: 12px; top: calc(var(--safe-top) + 50px); z-index: 41; }

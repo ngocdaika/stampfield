@@ -50,7 +50,7 @@ const STR = {
     tplNew: "Mẫu mới", tplName: "Tên mẫu", authorPh: "Họ tên người chụp",
     optDate: "Định dạng ngày giờ", optCoord: "Đơn vị tọa độ", optQuality: "Chất lượng ảnh",
     qHigh: "Cao · 100%", qStd: "Chuẩn · 92%", qEco: "Tiết kiệm · 80%",
-    day: "Hôm nay", yesterday: "Hôm qua", noAddr: "Địa chỉ chưa xác định", nogps: "KHÔNG GPS",
+    digitalZoom: "Máy không có zoom quang ở mức này — dùng zoom số (crop)", day: "Hôm nay", yesterday: "Hôm qua", noAddr: "Địa chỉ chưa xác định", nogps: "KHÔNG GPS",
     dpScreens: "Màn hình", dpOnboard: "Quyền", dpEditor: "Mẫu", dpPreview: "Xem trước", dpLibrary: "Thư viện", dpDetail: "Chi tiết", dpProjects: "Dự án", dpSettings: "Cài đặt",
     dpModeLang: "Chế độ & ngôn ngữ", dpWm: "Vị trí watermark", dpWmNote: "Trên màn Camera, giữ và kéo thẻ watermark — thả ra sẽ hít vào vùng gần nhất trong 5 vùng neo.", dpAnchor: "neo hiện tại: ",
     mapEmpty: "Chưa có ảnh có tọa độ để hiển thị.", allProjects: "Tất cả dự án", pdfTitle: "BẢNG ẢNH HIỆN TRƯỜNG", pdfBy: "Người chụp"
@@ -98,7 +98,7 @@ const STR = {
     tplNew: "New template", tplName: "Template name", authorPh: "Photographer name",
     optDate: "Date format", optCoord: "Coordinate unit", optQuality: "Photo quality",
     qHigh: "High · 100%", qStd: "Standard · 92%", qEco: "Economy · 80%",
-    day: "Today", yesterday: "Yesterday", noAddr: "Address unknown", nogps: "NO GPS",
+    digitalZoom: "No optical zoom at this level — using digital zoom (crop)", day: "Today", yesterday: "Yesterday", noAddr: "Address unknown", nogps: "NO GPS",
     dpScreens: "Screens", dpOnboard: "Permissions", dpEditor: "Template", dpPreview: "Preview", dpLibrary: "Library", dpDetail: "Detail", dpProjects: "Projects", dpSettings: "Settings",
     dpModeLang: "Mode & language", dpWm: "Watermark position", dpWmNote: "On the Camera screen, hold and drag the watermark card — it snaps to the nearest of 5 anchor zones.", dpAnchor: "current anchor: ",
     mapEmpty: "No geotagged photos to show yet.", allProjects: "All projects", pdfTitle: "SITE PHOTO SHEET", pdfBy: "Captured by"
@@ -250,21 +250,40 @@ function show(name) {
 }
 
 /* ============================================================ camera */
-async function startCamera() {
+/* --- lenses: iOS/Android expose extra back cameras as separate devices (labels only after permission) --- */
+async function scanLenses() {
+  R.lenses = { ultra: null, wide: null, tele: null };
+  try {
+    const devs = (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === "videoinput");
+    for (const d of devs) {
+      const l = (d.label || "").toLowerCase();
+      if (!/back|rear|environment|sau/.test(l)) continue;
+      if (/ultra|siêu rộng/.test(l)) R.lenses.ultra = R.lenses.ultra || d.deviceId;
+      else if (/tele/.test(l)) R.lenses.tele = R.lenses.tele || d.deviceId;
+      else if (/dual|triple/.test(l)) { /* virtual multi-lens device — skip */ }
+      else R.lenses.wide = R.lenses.wide || d.deviceId;
+    }
+  } catch (e) { /* ignore */ }
+}
+async function startCamera(deviceId) {
   // reuse the granted stream whenever possible — a new getUserMedia() is what triggers a fresh permission prompt on iOS
-  if (R.stream && R.stream.active && R.track && R.track.readyState === "live") { $("#video").play().catch(() => {}); return; }
+  if (!deviceId && R.stream && R.stream.active && R.track && R.track.readyState === "live") { $("#video").play().catch(() => {}); return; }
   $("#vf-placeholder").textContent = "live camera preview";
   try {
-    const constraints = { audio: false, video: { facingMode: { ideal: S.facing }, width: { ideal: 4032 }, height: { ideal: 3024 } } };
-    const stream = await navigator.mediaDevices.getUserMedia(constraints);
-    R.stream = stream; R.track = stream.getVideoTracks()[0];
+    const video = deviceId ? { deviceId: { exact: deviceId } } : { facingMode: { ideal: S.facing } };
+    Object.assign(video, { width: { ideal: 4032 }, height: { ideal: 3024 } });
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: false, video });
+    if (R.stream) R.stream.getTracks().forEach((tr) => tr.stop());
+    R.stream = stream; R.track = stream.getVideoTracks()[0]; R.deviceId = deviceId || null;
     const v = $("#video"); v.srcObject = stream; await v.play().catch(() => {});
     v.classList.toggle("mirror", S.facing === "user");
     $("#vf-placeholder").classList.add("hidden");
     R.camPerm = "granted";
     const caps = R.track.getCapabilities ? R.track.getCapabilities() : {};
-    R.torchOk = !!caps.torch;
+    R.caps = caps; R.torchOk = !!caps.torch;
     if (S.flash && R.torchOk) R.track.applyConstraints({ advanced: [{ torch: true }] }).catch(() => {});
+    if (!R.lenses) await scanLenses();
+    renderZoomPill(); applyZoom(R.zoom || 1, true); applyEV(R.ev || 0, true); unlockAEAF(true);
     renderCamBanner();
   } catch (e) {
     R.camPerm = e && e.name === "NotAllowedError" ? "denied" : "error";
@@ -280,7 +299,7 @@ function stopCamera() {
 }
 async function flipCamera() {
   S.facing = S.facing === "user" ? "environment" : "user"; saveSettings();
-  stopCamera(); await startCamera();
+  R.zoom = 1; R.deviceId = null; stopCamera(); await startCamera();
 }
 function toggleFlash() {
   S.flash = !S.flash; saveSettings();
@@ -293,6 +312,112 @@ function cycleRatio() {
   $("#ratio-btn").textContent = S.ratio;
 }
 function ratioValue() { const [a, b] = S.ratio.split(":").map(Number); return a / b; }
+
+/* ============================================================ zoom · focus · exposure
+   Zoom strategy per preset: (1) hardware `zoom` constraint when the track supports that factor,
+   (2) switch to the ultra-wide / telephoto device when the phone exposes one,
+   (3) otherwise digital zoom (CSS scale on the preview + centre crop at capture). 0.5× only when a wider lens exists. */
+const ZOOMS = [0.5, 1, 2, 3];
+function zoomCap() { const z = R.caps && R.caps.zoom; return z && typeof z.min === "number" ? z : null; }
+function zoomAvailable(f) {
+  if (f >= 1) return true; // 1× always; 2×/3× fall back to digital
+  const z = zoomCap(); return !!((z && z.min <= f + 1e-6) || (R.lenses && R.lenses.ultra));
+}
+function renderZoomPill() {
+  $$("#zoom-pill button").forEach((b) => { const f = parseFloat(b.dataset.zoom); b.classList.toggle("hidden", !zoomAvailable(f) || S.facing === "user" && f !== 1); b.classList.toggle("on", f === (R.zoom || 1)); });
+}
+async function applyZoom(f, silent) {
+  R.zoom = f; R.digitalZoom = 1; renderZoomPill();
+  const v = $("#video");
+  const z = zoomCap(); const lenses = R.lenses || {};
+  // choose device: ultra-wide for 0.5, telephoto for 3 (only if hardware zoom can't do it), else wide/default
+  let wantDevice = null;
+  if (S.facing !== "user") {
+    if (f < 1 && !(z && z.min <= f) && lenses.ultra) wantDevice = lenses.ultra;
+    else if (f >= 3 && !(z && z.max >= f) && lenses.tele) wantDevice = lenses.tele;
+    else if (R.deviceId && (R.deviceId === lenses.ultra || R.deviceId === lenses.tele)) wantDevice = lenses.wide || "default";
+  }
+  if (wantDevice && wantDevice !== R.deviceId) {
+    if (wantDevice === "default") { R.deviceId = null; if (R.stream) R.stream.getTracks().forEach((tr) => tr.stop()); R.stream = null; await startCamera(); return; }
+    await startCamera(wantDevice); return; // startCamera re-applies zoom with the new caps
+  }
+  const onNative = R.deviceId && (R.deviceId === lenses.ultra || R.deviceId === lenses.tele);
+  if (onNative) { v.style.transform = S.facing === "user" ? "scaleX(-1)" : ""; return; } // lens gives the factor natively
+  const zc = zoomCap();
+  if (zc && f >= zc.min && f <= zc.max) {
+    try { await R.track.applyConstraints({ advanced: [{ zoom: f }] }); v.style.transform = ""; return; } catch (e) { /* fall through to digital */ }
+  }
+  R.digitalZoom = Math.max(1, f); v.style.transform = `scale(${R.digitalZoom})${S.facing === "user" ? " scaleX(-1)" : ""}`;
+  if (!silent && f > 1) toast(t("digitalZoom"));
+}
+/* exposure compensation: hardware when available, otherwise software (preview filter + capture composite) */
+function evCap() { const c = R.caps && R.caps.exposureCompensation; return c && typeof c.min === "number" ? c : null; }
+async function applyEV(ev, silent) {
+  R.ev = clamp(Math.round(ev * 10) / 10, -2, 2);
+  const c = evCap(); const v = $("#video");
+  R.evSoft = true;
+  if (c) { try { await R.track.applyConstraints({ advanced: [{ exposureCompensation: clamp(R.ev, c.min, c.max) }] }); R.evSoft = false; } catch (e) { /* software */ } }
+  v.style.filter = R.evSoft && R.ev !== 0 ? `brightness(${1 + R.ev * 0.35})` : "";
+  $("#ev-val").textContent = (R.ev > 0 ? "+" : "") + R.ev.toFixed(1); $("#ev-slider").style.setProperty("--ev-y", `${50 - R.ev * 22}%`);
+}
+function drawEV(ctx, W, H) {
+  if (!R.evSoft || !R.ev) return;
+  ctx.save(); ctx.globalCompositeOperation = R.ev > 0 ? "screen" : "multiply";
+  ctx.fillStyle = R.ev > 0 ? `rgba(255,255,255,${Math.min(.75, R.ev * .28)})` : `rgba(0,0,0,${Math.min(.75, -R.ev * .28)})`;
+  ctx.fillRect(0, 0, W, H); ctx.restore();
+}
+async function focusAt(nx, ny) {
+  const caps = R.caps || {}; if (!R.track) return;
+  const adv = {};
+  if (Array.isArray(caps.focusMode)) adv.focusMode = caps.focusMode.includes("single-shot") ? "single-shot" : caps.focusMode.includes("continuous") ? "continuous" : undefined;
+  if (Array.isArray(caps.exposureMode) && caps.exposureMode.includes("continuous")) adv.exposureMode = "continuous";
+  if (caps.pointsOfInterest !== undefined) adv.pointsOfInterest = [{ x: nx, y: ny }];
+  if (Object.keys(adv).length) { try { await R.track.applyConstraints({ advanced: [adv] }); } catch (e) { /* unsupported → visual only */ } }
+}
+async function lockAEAF() {
+  const caps = R.caps || {}; if (!R.track) return;
+  const st = R.track.getSettings ? R.track.getSettings() : {}; const adv = {};
+  if (Array.isArray(caps.focusMode) && caps.focusMode.includes("manual") && st.focusDistance != null) { adv.focusMode = "manual"; adv.focusDistance = st.focusDistance; }
+  if (Array.isArray(caps.exposureMode) && caps.exposureMode.includes("manual") && st.exposureTime != null) { adv.exposureMode = "manual"; adv.exposureTime = st.exposureTime; }
+  if (Object.keys(adv).length) { try { await R.track.applyConstraints({ advanced: [adv] }); } catch (e) { /* ignore */ } }
+  R.aeLocked = true; $("#ae-lock").classList.remove("hidden"); $("#focus-box").classList.add("locked", "show", "dim");
+}
+async function unlockAEAF(silent) {
+  if (!R.aeLocked && silent) return;
+  R.aeLocked = false; $("#ae-lock").classList.add("hidden"); $("#focus-box").classList.remove("locked");
+  const caps = R.caps || {}; if (!R.track) return; const adv = {};
+  if (Array.isArray(caps.focusMode) && caps.focusMode.includes("continuous")) adv.focusMode = "continuous";
+  if (Array.isArray(caps.exposureMode) && caps.exposureMode.includes("continuous")) adv.exposureMode = "continuous";
+  if (Object.keys(adv).length) { try { await R.track.applyConstraints({ advanced: [adv] }); } catch (e) { /* ignore */ } }
+}
+/* viewfinder gestures: tap = focus/expose here · long-press = AE/AF lock · vertical drag = exposure */
+function wireViewfinderGestures() {
+  const vf = $("#viewfinder"), box = $("#focus-box");
+  let down = null, pressT = null, moved = false, dragging = false, hideT = null, longPressed = false;
+  const showBox = (x, y) => { const r = vf.getBoundingClientRect(); const k = r.width / vf.offsetWidth || 1; const lx = (x - r.left) / k, ly = (y - r.top) / k; box.style.left = lx + "px"; box.style.top = ly + "px"; box.classList.toggle("flip", lx > vf.offsetWidth - 130); box.classList.remove("dim"); box.classList.add("show"); clearTimeout(hideT); hideT = setTimeout(() => box.classList.add("dim"), 1500); setTimeout(() => { if (!R.aeLocked && !dragging) box.classList.remove("show"); }, 3500); };
+  vf.addEventListener("pointerdown", (e) => {
+    if (e.target.closest("#wm") || e.target.closest("button")) return;
+    if (R.screen !== "camera" || R.camPerm !== "granted") return;
+    down = { x: e.clientX, y: e.clientY, ev: R.ev || 0 }; moved = false; dragging = false; longPressed = false;
+    pressT = setTimeout(() => { if (!moved) { longPressed = true; navigator.vibrate && navigator.vibrate(12); showBox(down.x, down.y); lockAEAF(); } }, 550);
+  });
+  vf.addEventListener("pointermove", (e) => {
+    if (!down) return; const dx = e.clientX - down.x, dy = e.clientY - down.y;
+    if (!moved && Math.hypot(dx, dy) > 8) { moved = true; clearTimeout(pressT); if (Math.abs(dy) > Math.abs(dx)) { dragging = true; if (!box.classList.contains("show")) showBox(down.x, down.y); } }
+    if (dragging) { e.preventDefault(); const k = vf.getBoundingClientRect().height / vf.offsetHeight || 1; applyEV(down.ev - dy / k / 60); box.classList.remove("dim"); clearTimeout(hideT); }
+  });
+  const end = (e) => {
+    if (!down) return; clearTimeout(pressT);
+    if (longPressed) { /* lock already applied on hold */ }
+    else if (!moved) { // tap
+      if (R.aeLocked) { unlockAEAF(); box.classList.remove("show"); }
+      else { const r = vf.getBoundingClientRect(); showBox(e.clientX, e.clientY); focusAt(clamp((e.clientX - r.left) / r.width, 0, 1), clamp((e.clientY - r.top) / r.height, 0, 1)); }
+    } else if (dragging) { hideT = setTimeout(() => box.classList.add("dim"), 800); setTimeout(() => { if (!R.aeLocked) box.classList.remove("show"); }, 3000); }
+    down = null; dragging = false;
+  };
+  vf.addEventListener("pointerup", end); vf.addEventListener("pointercancel", end);
+  $$("#zoom-pill button").forEach((b) => b.onclick = () => applyZoom(parseFloat(b.dataset.zoom)));
+}
 
 /* ============================================================ geolocation, heading, geocode, weather */
 let geoWatch = null;
@@ -455,7 +580,7 @@ function drawHashPattern(ctx, x, y, size, seed) {
 const safeTopPx = () => parseFloat(getComputedStyle($("#app")).paddingTop) || 0;
 const safeBottomPx = () => parseFloat(getComputedStyle($("#app")).getPropertyValue("--safe-bottom")) || 0;
 const WM_TOP = () => 52 + safeTopPx();
-const WM_BOTTOM = () => 208 + safeBottomPx();
+const WM_BOTTOM = () => 250 + safeBottomPx();
 function wmAnchor(pos) {
   const top = WM_TOP() + "px", bottom = WM_BOTTOM() + "px";
   return { tl: { top, left: "12px" }, tr: { top, right: "12px" }, bl: { bottom, left: "12px" }, br: { bottom, right: "12px" }, bc: { bottom, left: "50%", transform: "translateX(-50%)" } }[pos] || { bottom, left: "12px" };
@@ -566,11 +691,14 @@ function grabFrame() {
   // portrait phone: sensor is landscape-oriented in the stream? use as-is orientation, crop to ratio (portrait if vh>vw)
   let cw, ch; const portrait = vh > vw; const r = portrait ? 1 / target : target;
   if (vw / vh > r) { ch = vh; cw = Math.round(vh * r); } else { cw = vw; ch = Math.round(vw / r); }
-  const sx = Math.round((vw - cw) / 2), sy = Math.round((vh - ch) / 2);
+  // digital zoom = centre crop of the ratio box (output keeps the full ratio-box size)
+  const dz = R.digitalZoom || 1; const zw = Math.round(cw / dz), zh = Math.round(ch / dz);
+  const sx = Math.round((vw - zw) / 2), sy = Math.round((vh - zh) / 2);
   const c = $("#work"); c.width = cw; c.height = ch; const ctx = c.getContext("2d");
   if (S.facing === "user") { ctx.translate(cw, 0); ctx.scale(-1, 1); }
-  ctx.drawImage(v, sx, sy, cw, ch, 0, 0, cw, ch);
+  ctx.drawImage(v, sx, sy, zw, zh, 0, 0, cw, ch);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
+  drawEV(ctx, cw, ch);
   return { c, ctx, w: cw, h: ch };
 }
 async function stampFrame(frame, geoSnap, when) {
@@ -641,7 +769,7 @@ async function toggleRecord() {
   const v = $("#video"); const c = document.createElement("canvas");
   const scale = Math.min(1, 1280 / Math.max(v.videoWidth, v.videoHeight)); c.width = Math.round(v.videoWidth * scale); c.height = Math.round(v.videoHeight * scale);
   const ctx = c.getContext("2d"); const logo = await loadLogoImg(R.tpl.logo); const startGeo0 = { ...R.geo }; const when = new Date();
-  const loop = () => { if (!R.recorder) return; ctx.drawImage(v, 0, 0, c.width, c.height); drawWatermark(ctx, c.width, c.height, stampData(new Date(), R.geo), R.tpl.pos, logo); R.recRaf = requestAnimationFrame(loop); };
+  const loop = () => { if (!R.recorder) return; const dz = R.digitalZoom || 1; ctx.drawImage(v, (v.videoWidth - v.videoWidth / dz) / 2, (v.videoHeight - v.videoHeight / dz) / 2, v.videoWidth / dz, v.videoHeight / dz, 0, 0, c.width, c.height); drawEV(ctx, c.width, c.height); drawWatermark(ctx, c.width, c.height, stampData(new Date(), R.geo), R.tpl.pos, logo); R.recRaf = requestAnimationFrame(loop); };
   const stream = c.captureStream(30);
   const mime = ["video/mp4", "video/webm;codecs=vp9", "video/webm"].find((m) => MediaRecorder.isTypeSupported(m)) || "";
   const rec = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: 6e6 } : undefined);
@@ -1033,6 +1161,7 @@ function wire() {
   $("#btn-editor").onclick = () => show("editor"); $("#proj-chip").onclick = () => show("projects"); $("#thumb").onclick = () => show("library");
   $$("#modes button").forEach((b) => b.onclick = () => { if (R.recorder) return; S.camMode = b.dataset.mode; saveSettings(); $$("#modes button").forEach((x) => x.classList.toggle("on", x === b)); });
   $("#wm").addEventListener("pointerdown", onWmDown);
+  wireViewfinderGestures();
   // editor
   $$("#field-list .toggle").forEach((tg) => tg.onclick = () => { R.editorDraft.fields[tg.dataset.field] = !R.editorDraft.fields[tg.dataset.field]; if (tg.dataset.field === "weather" && R.editorDraft.fields.weather) { const s = R.tpl; R.tpl = R.editorDraft; maybeWeather(); R.tpl = s; } renderEditor(); });
   $$("[data-coord]").forEach((b) => b.onclick = () => { S.coordFmt = b.dataset.coord; saveSettings(); renderEditor(); });
