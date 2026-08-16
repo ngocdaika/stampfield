@@ -16,7 +16,7 @@ const STR = {
     granted: "ĐÃ CẤP", optional: "TÙY CHỌN", pending: "CHƯA CẤP", denied: "TỪ CHỐI",
     locAlways: "Luôn cho phép", locWhile: "Khi dùng app",
     obCta: "Cho phép & mở camera",
-    obFoot: "Có thể đổi từng quyền sau trong Cài đặt. Không có quyền vị trí, ảnh vẫn chụp được nhưng không đủ giá trị hồ sơ.",
+    obFoot: "iOS chỉ hỏi một lần nếu bạn đặt Camera / Vị trí = “Cho phép” trong Cài đặt trang web của Safari — chạm để xem cách làm. Không có quyền vị trí, ảnh vẫn chụp được nhưng không đủ giá trị hồ sơ.",
     modePhoto: "ẢNH", modeVideo: "VIDEO", modeBurst: "LIÊN TỤC",
     back: "Camera", save: "Lưu", edTitle: "Mẫu watermark", newTpl: "Mẫu mới",
     fields: "Trường hiển thị", appearance: "Hiển thị",
@@ -32,7 +32,10 @@ const STR = {
     prTitle: "Dự án", done: "Xong", active: "ĐANG CHỤP", newProject: "Tạo dự án mới",
     stTitle: "Cài đặt", grpFormat: "Định dạng", grpStorage: "Lưu trữ", grpLang: "Ngôn ngữ", grpAppearance: "Giao diện", grpAbout: "Về app",
     sDate: "Định dạng ngày giờ", sCoord: "Đơn vị tọa độ", sQuality: "Chất lượng ảnh",
-    sAutoSave: "Tự lưu vào Ảnh iOS", sCloud: "Đồng bộ cloud", sAuthor: "Người chụp", sReset: "Xóa toàn bộ dữ liệu app", mSystem: "Theo hệ thống",
+    sAutoSave: "Lưu vào Ảnh iOS sau mỗi lần chụp", sAutoSaveD: "Mở bảng Chia sẻ → Lưu ảnh (web app không ghi thẳng vào Ảnh)", sCloud: "Đồng bộ cloud", sAuthor: "Người chụp", sReset: "Xóa toàn bộ dữ liệu app", mSystem: "Theo hệ thống",
+    sCompass: "La bàn — hướng máy ảnh", sCompassD: "iOS hỏi quyền chuyển động mỗi lần mở app; tắt = dùng hướng GPS khi di chuyển",
+    sPerm: "Không hỏi quyền mỗi lần mở", sPermD: "Cách đặt Camera / Vị trí thành “Cho phép” vĩnh viễn",
+    permHelpT: "Chỉ cấp quyền một lần", permHelp: "iOS mặc định đặt quyền của trang web là “Hỏi” nên hỏi lại mỗi phiên. Đổi sang “Cho phép” một lần:\n\n1. Mở địa chỉ app bằng Safari (không phải icon trên màn hình chính).\n2. Chạm nút “AA” ở thanh địa chỉ → “Cài đặt trang web”.\n3. Đặt Camera = Cho phép, Vị trí = Cho phép → Xong.\n4. Nếu đã cài icon: xóa icon, thêm lại từ Safari (Chia sẻ → Thêm vào MH chính).\n\nCách khác cho toàn bộ trang: Cài đặt iOS → Ứng dụng → Safari → Camera / Vị trí → Cho phép.\n\nAndroid/Chrome: nhớ quyền sau lần đầu chọn “Cho phép”.", gotIt: "Đã hiểu",
     photos: "ảnh", items: "hạng mục", empty: "Chưa có ảnh nào.\nChụp ảnh đầu tiên từ màn Camera.",
     gpsLocating: "Đang định vị…", gpsLost: "Mất tín hiệu GPS", gpsOff: "GPS: không xác định", gpsSat: "GPS ±{a}m",
     noLocT: "Chưa có quyền vị trí", noLocD: "Ảnh sẽ không có tọa độ — không dùng được cho biên bản nghiệm thu.", openSet: "Cấp quyền vị trí",
@@ -61,7 +64,7 @@ const STR = {
     granted: "GRANTED", optional: "OPTIONAL", pending: "PENDING", denied: "DENIED",
     locAlways: "Always allow", locWhile: "While using",
     obCta: "Allow & open camera",
-    obFoot: "Each permission can be changed later in Settings. Without location, photos still work but carry no evidentiary value.",
+    obFoot: "iOS asks only once if you set Camera / Location = “Allow” in Safari's Website Settings — tap to see how. Without location, photos still work but carry no evidentiary value.",
     modePhoto: "PHOTO", modeVideo: "VIDEO", modeBurst: "BURST",
     back: "Camera", save: "Save", edTitle: "Watermark template", newTpl: "New",
     fields: "Visible fields", appearance: "Appearance",
@@ -77,7 +80,10 @@ const STR = {
     prTitle: "Projects", done: "Done", active: "SHOOTING", newProject: "New project",
     stTitle: "Settings", grpFormat: "Format", grpStorage: "Storage", grpLang: "Language", grpAppearance: "Appearance", grpAbout: "About",
     sDate: "Date format", sCoord: "Coordinate unit", sQuality: "Photo quality",
-    sAutoSave: "Auto-save to iOS Photos", sCloud: "Cloud sync", sAuthor: "Photographer", sReset: "Erase all app data", mSystem: "System",
+    sAutoSave: "Save to iOS Photos after each shot", sAutoSaveD: "Opens the Share sheet → Save Image (web apps can't write to Photos directly)", sCloud: "Cloud sync", sAuthor: "Photographer", sReset: "Erase all app data", mSystem: "System",
+    sCompass: "Compass — camera heading", sCompassD: "iOS asks for motion access on every launch; off = GPS course while moving",
+    sPerm: "Stop asking for permissions", sPermD: "How to set Camera / Location to “Allow” permanently",
+    permHelpT: "Grant permissions once", permHelp: "iOS defaults website permissions to “Ask”, so it asks every session. Switch to “Allow” once:\n\n1. Open the app URL in Safari (not the Home Screen icon).\n2. Tap “AA” in the address bar → “Website Settings”.\n3. Set Camera = Allow, Location = Allow → Done.\n4. If the icon is already installed: remove it and add it again from Safari (Share → Add to Home Screen).\n\nAlternatively for all sites: iOS Settings → Apps → Safari → Camera / Location → Allow.\n\nAndroid/Chrome remembers after the first “Allow”.", gotIt: "Got it",
     photos: "photos", items: "items", empty: "No photos yet.\nTake your first shot from the Camera.",
     gpsLocating: "Locating…", gpsLost: "GPS signal lost", gpsOff: "GPS: unknown", gpsSat: "GPS ±{a}m",
     noLocT: "Location not granted", noLocD: "Photos will carry no coordinates — unusable for acceptance records.", openSet: "Grant location",
@@ -190,7 +196,7 @@ const DEFAULT_TEMPLATE = () => ({
 });
 const S = {
   lang: "vi", mode: "dark", dateFmt: DATE_FMTS[0], coordFmt: "dms", quality: 0.92,
-  autoSave: canShareFiles() && /iPhone|iPad|Android/i.test(navigator.userAgent), cloud: false, author: "", onboarded: false,
+  autoSave: false, compass: false, cloud: false, author: "", onboarded: false,
   activeProjectId: null, templateId: "tpl-nghiemthu", ratio: "4:3", facing: "environment", flash: false, camMode: "photo"
 };
 function loadSettings() { try { Object.assign(S, JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}")); } catch (e) { /* ignore */ } }
@@ -238,13 +244,15 @@ function show(name) {
   if (name === "settings") renderSettings();
   if (name === "detail" && !R.detailId && R.photos.length) R.detailId = R.photos[0].id;
   if (name === "detail") renderDetail();
-  if (name === "preview" && !R.pending) demoPreviewFromLast();
+  if (name === "preview" && !R.pending && !R.previewing) { demoPreviewFromLast(); return; }
+  if (name !== "preview") R.previewing = false;
   history.replaceState(null, "", "#" + name);
 }
 
 /* ============================================================ camera */
 async function startCamera() {
-  if (R.stream && R.stream.active) return;
+  // reuse the granted stream whenever possible — a new getUserMedia() is what triggers a fresh permission prompt on iOS
+  if (R.stream && R.stream.active && R.track && R.track.readyState === "live") { $("#video").play().catch(() => {}); return; }
   $("#vf-placeholder").textContent = "live camera preview";
   try {
     const constraints = { audio: false, video: { facingMode: { ideal: S.facing }, width: { ideal: 4032 }, height: { ideal: 3024 } } };
@@ -305,16 +313,22 @@ function startGeo() {
     renderGps(); renderCamBanner(); renderWm();
   }, { enableHighAccuracy: true, maximumAge: 2000, timeout: 20000 });
 }
-function startHeading() {
+/* Compass heading is opt-in (S.compass): iOS never remembers the motion permission and would prompt on every
+   launch, so it is only requested from a user gesture after the user turns it on. GPS course is used otherwise. */
+let headingOn = false;
+function startHeading(fromGesture) {
+  if (!S.compass || headingOn) return;
   const handler = (e) => {
     let h = null;
     if (e.webkitCompassHeading != null) h = e.webkitCompassHeading;
     else if (e.absolute && e.alpha != null) h = (360 - e.alpha) % 360;
     if (h != null) { R.geo.heading = h; R.geo.headingSrc = "compass"; }
   };
+  const attach = () => { headingOn = true; window.addEventListener("deviceorientationabsolute", handler, true); window.addEventListener("deviceorientation", handler, true); };
   if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
-    DeviceOrientationEvent.requestPermission().then((s) => { if (s === "granted") window.addEventListener("deviceorientation", handler); }).catch(() => {});
-  } else window.addEventListener("deviceorientationabsolute", handler, true), window.addEventListener("deviceorientation", handler, true);
+    if (!fromGesture) return; // iOS: must be inside a tap
+    DeviceOrientationEvent.requestPermission().then((s) => { if (s === "granted") attach(); }).catch(() => {});
+  } else attach();
 }
 let geocodeBusy = false;
 async function maybeGeocode(force) {
@@ -437,19 +451,26 @@ function drawHashPattern(ctx, x, y, size, seed) {
   for (let i = 0; i < n * n; i++) { h = Math.imul(h ^ (h >>> 15), 2246822507) >>> 0; if ((h & 3) === 0 || i < n || i % n === 0) { ctx.fillRect(x + (i % n) * cell, y + Math.floor(i / n) * cell, cell, cell); } }
   ctx.fillStyle = "#e6edf3"; ctx.fillRect(x + cell * 1, y + cell * 1, cell, cell);
 }
-const WM_ANCHOR = { tl: { top: "96px", left: "12px" }, tr: { top: "96px", right: "12px" }, bl: { bottom: "168px", left: "12px" }, br: { bottom: "168px", right: "12px" }, bc: { bottom: "168px", left: "50%", transform: "translateX(-50%)" } };
+/* safe insets for the floating watermark on the viewfinder: below the GPS chip, above the control row */
+const safeTopPx = () => parseFloat(getComputedStyle($("#app")).paddingTop) || 0;
+const safeBottomPx = () => parseFloat(getComputedStyle($("#app")).getPropertyValue("--safe-bottom")) || 0;
+const WM_TOP = () => 52 + safeTopPx();
+const WM_BOTTOM = () => 208 + safeBottomPx();
+function wmAnchor(pos) {
+  const top = WM_TOP() + "px", bottom = WM_BOTTOM() + "px";
+  return { tl: { top, left: "12px" }, tr: { top, right: "12px" }, bl: { bottom, left: "12px" }, br: { bottom, right: "12px" }, bc: { bottom, left: "50%", transform: "translateX(-50%)" } }[pos] || { bottom, left: "12px" };
+}
 function renderWm() {
   if (!R.tpl) return;
   const el = $("#wm"), d = stampData(); fillWmDom(el, d);
   el.style.transform = ""; el.style.top = el.style.left = el.style.right = el.style.bottom = "";
-  const safeTop = parseFloat(getComputedStyle($("#app")).paddingTop) || 0;
   if (R.wmLive) { el.classList.add("live"); el.style.left = R.wmLive.x + "px"; el.style.top = R.wmLive.y + "px"; }
-  else { el.classList.remove("live"); const a = WM_ANCHOR[R.tpl.pos] || WM_ANCHOR.bl; for (const k in a) el.style[k] = a[k]; if (a.top) el.style.top = (96 + safeTop) + "px"; }
+  else { el.classList.remove("live"); const a = wmAnchor(R.tpl.pos); for (const k in a) el.style[k] = a[k]; }
   el.style.width = Math.round(292 * d.scale) + "px";
   el.style.zoom = "";
   $("#dp-anchor").textContent = t("dpAnchor") + R.tpl.pos;
   $$("#desk-panel [data-setpos]").forEach((b) => b.classList.toggle("on", b.dataset.setpos === R.tpl.pos));
-  const dz = $("#dropzones"); const inset = { top: 96 + safeTop, bottom: 168 + (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--safe-bottom")) || 0) };
+  const dz = $("#dropzones"); const inset = { top: WM_TOP(), bottom: WM_BOTTOM() };
   dz.querySelector(".tl").style.cssText = `top:${inset.top}px;left:12px`; dz.querySelector(".tr").style.cssText = `top:${inset.top}px;right:12px`;
   dz.querySelector(".bl").style.cssText = `bottom:${inset.bottom}px;left:12px`; dz.querySelector(".br").style.cssText = `bottom:${inset.bottom}px;right:12px`;
   dz.querySelector(".bc").style.cssText = `bottom:${inset.bottom}px;left:50%;transform:translateX(-50%)`;
@@ -460,12 +481,12 @@ function onWmDown(e) {
   const el = $("#wm"), stage = $("#viewfinder"); e.preventDefault();
   const sr = stage.getBoundingClientRect(), er = el.getBoundingClientRect();
   const w = er.width, h = er.height, grabX = e.clientX - er.left, grabY = e.clientY - er.top;
-  const safeTop = parseFloat(getComputedStyle($("#app")).paddingTop) || 0;
-  const at = (ev) => ({ x: clamp(ev.clientX - sr.left - grabX, 12, sr.width - w - 12), y: clamp(ev.clientY - sr.top - grabY, 96 + safeTop, sr.height - 168 - h) });
+  const k = sr.width / $("#viewfinder").offsetWidth || 1; // desktop frame is scaled by --fit
+  const at = (ev) => ({ x: clamp((ev.clientX - sr.left - grabX) / k, 12, sr.width / k - w / k - 12), y: clamp((ev.clientY - sr.top - grabY) / k, WM_TOP(), sr.height / k - WM_BOTTOM() - h / k) });
   const move = (ev) => { R.wmLive = at(ev); renderWm(); };
   const up = (ev) => {
     window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); window.removeEventListener("pointercancel", up);
-    const p = at(ev), cx = p.x + w / 2, cy = p.y + h / 2, W = sr.width, H = sr.height;
+    const p = at(ev), cx = p.x + w / k / 2, cy = p.y + h / k / 2, W = sr.width / k, H = sr.height / k;
     let pos;
     if (cy < H * 0.47) pos = cx < W / 2 ? "tl" : "tr";
     else if (cx > W / 3 && cx < W * 2 / 3) pos = "bc";
@@ -648,9 +669,9 @@ function openPreview(rec) {
   $("#pv-coord").textContent = fmtDec(rec.lat, rec.lng);
   $("#pv-acc").textContent = rec.acc != null ? `±${Math.round(rec.acc)} m` + (rec.alt != null ? ` · ALT ${rec.alt.toFixed(1)} m` : "") : "—";
   $("#pv-note").value = rec.note || "";
-  show("preview");
+  R.previewing = true; show("preview");
 }
-function demoPreviewFromLast() { if (R.photos[0]) { R.pending = null; openPreview({ ...R.photos[0], _existing: true }); } else show("camera"); }
+function demoPreviewFromLast() { if (R.photos[0]) { R.pending = null; openPreview({ ...R.photos[0], _existing: true }); } else { toast(t("empty").split("\n")[0]); show("camera"); } }
 async function pvSave() {
   const rec = R.pending; const note = $("#pv-note").value.trim();
   if (!rec) { const ex = R.photos[0]; if (ex) { ex.note = note; await dbPut("photos", ex); } show("library"); return; }
@@ -866,7 +887,7 @@ function renderSettings() {
   $("#st-date-v").textContent = S.dateFmt.split(" ")[0].replace(/ HH.*/, "");
   $("#st-coord-v").textContent = S.coordFmt.toUpperCase();
   $("#st-quality-v").textContent = S.quality >= 1 ? "12 MP · 100%" : S.quality >= 0.9 ? "12 MP · 92%" : "12 MP · 80%";
-  $("#st-autosave").classList.toggle("on", !!S.autoSave); $("#st-cloud").classList.toggle("on", !!S.cloud);
+  $("#st-autosave").classList.toggle("on", !!S.autoSave); $("#st-cloud").classList.toggle("on", !!S.cloud); $("#st-compass").classList.toggle("on", !!S.compass);
   $("#st-author-v").textContent = S.author || "—";
   $$("#st-mode .row").forEach((b) => b.querySelector(".ck").style.opacity = b.dataset.mode === S.mode ? 1 : 0);
   $$("#st-lang .row").forEach((b) => b.querySelector(".ck").style.opacity = b.dataset.lang === S.lang ? 1 : 0);
@@ -876,6 +897,11 @@ function renderSettings() {
 function optionSheet(title, opts, cur, onPick) {
   sheet(`<h3>${title}</h3>` + opts.map((o) => `<button class="opt" data-v="${escapeHtml(o.v)}"><span class="grow">${escapeHtml(o.l)}</span><span class="ck" style="opacity:${o.v === cur ? 1 : 0}">✓</span></button>`).join(""));
   $$("#sheet .opt").forEach((b) => b.onclick = () => { onPick(b.dataset.v); closeSheet(); });
+}
+
+function showPermHelp() {
+  sheet(`<h3>${escapeHtml(t("permHelpT"))}</h3><p style="white-space:pre-line">${escapeHtml(t("permHelp"))}</p><div class="btns"><button class="b2" id="ph-ok">${t("gotIt")}</button></div>`);
+  $("#ph-ok").onclick = closeSheet;
 }
 
 /* ============================================================ sheets / toast / busy */
@@ -991,7 +1017,7 @@ function updatePermPills() {
   set($("#perm-loc"), R.locPerm === "granted" ? "granted" : R.locPerm === "denied" ? "denied" : "pending");
 }
 async function onboardCta() {
-  await startCamera(); startGeo(); startHeading();
+  await startCamera(); startGeo();
   S.onboarded = true; saveSettings(); show("camera");
 }
 
@@ -999,6 +1025,7 @@ async function onboardCta() {
 function wire() {
   $$("[data-nav]").forEach((b) => b.addEventListener("click", () => show(b.dataset.nav)));
   $("#ob-cta").onclick = onboardCta;
+  $("#s-onboard .ob-foot").style.cursor = "pointer"; $("#s-onboard .ob-foot").onclick = showPermHelp;
   $$("#s-onboard .opts button").forEach((b) => b.onclick = () => { $$("#s-onboard .opts button").forEach((x) => x.classList.remove("on")); b.classList.add("on"); });
   // camera
   $("#shutter").onclick = () => { if (S.camMode === "video") toggleRecord(); else if (S.camMode === "burst") captureBurst(); else capturePhoto(false); };
@@ -1040,6 +1067,8 @@ function wire() {
   $("#st-quality").onclick = () => optionSheet(t("optQuality"), [{ v: "1", l: t("qHigh") }, { v: "0.92", l: t("qStd") }, { v: "0.8", l: t("qEco") }], String(S.quality), (v) => { S.quality = parseFloat(v); saveSettings(); renderSettings(); });
   $("#st-autosave").onclick = () => { S.autoSave = !S.autoSave; saveSettings(); renderSettings(); };
   $("#st-cloud").onclick = () => { S.cloud = !S.cloud; saveSettings(); renderSettings(); if (S.cloud) toast(t("cloudSoon")); };
+  $("#st-compass").onclick = () => { S.compass = !S.compass; saveSettings(); renderSettings(); if (S.compass) startHeading(true); };
+  $("#st-perm").onclick = showPermHelp;
   $("#st-author").onclick = () => { sheet(`<h3>${t("sAuthor")}</h3><div class="field"><label>${t("sAuthor")}</label><input id="f-author" value="${escapeHtml(S.author)}" placeholder="${t("authorPh")}"></div><div class="btns"><button class="b1" id="f-c">${t("cancel")}</button><button class="b2" id="f-o">${t("save")}</button></div>`); $("#f-c").onclick = closeSheet; $("#f-o").onclick = () => { S.author = $("#f-author").value.trim(); saveSettings(); closeSheet(); renderSettings(); }; setTimeout(() => $("#f-author").focus(), 50); };
   $$("#st-mode .row").forEach((b) => b.onclick = () => { S.mode = b.dataset.mode; saveSettings(); applyMode(); renderSettings(); });
   $$("#st-lang .row").forEach((b) => b.onclick = () => setLang(b.dataset.lang));
@@ -1089,7 +1118,9 @@ async function boot() {
   updatePermPills(); checkStorage();
   const h = location.hash.slice(1);
   if (!S.onboarded) show("onboard");
-  else { startGeo(); startHeading(); show(SCREENS.includes(h) && h !== "onboard" ? h : "camera"); }
+  else { startGeo(); startHeading(false); show(SCREENS.includes(h) && h !== "onboard" ? h : "camera"); }
+  // iOS: compass permission can only be requested inside a tap — do it on the first tap if the user enabled it
+  document.addEventListener("pointerdown", () => startHeading(true), { once: true, capture: true });
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
 }
 boot();

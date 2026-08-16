@@ -185,16 +185,17 @@ svg { display: block; }
   background: rgba(20,23,26,.6); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
   border: 1px solid rgba(255,255,255,.12); color: #fff;
 }
-#cam-top { position: absolute; left: 12px; right: 12px; display: flex; align-items: center; gap: 8px; z-index: 40; }
-#proj-chip { display: flex; align-items: center; gap: 7px; height: 40px; padding: 0 12px; border-radius: 12px; min-width: 0; }
+/* control row: bottom-right, just above the shutter row (thumb-reachable, one-handed) */
+#cam-top { position: absolute; right: 12px; bottom: calc(var(--safe-bottom) + 152px); display: flex; align-items: center; justify-content: flex-end; gap: 8px; z-index: 40; max-width: calc(100% - 24px); }
+#proj-chip { display: flex; align-items: center; gap: 7px; height: 44px; padding: 0 12px; border-radius: 12px; min-width: 0; }
 #proj-chip .dot { width: 7px; height: 7px; border-radius: 4px; background: #94bce3; flex: none; }
-#proj-chip .name { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 126px; }
-.cam-btn { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+#proj-chip .name { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 118px; }
+.cam-btn { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex: none; }
 .cam-btn.flash-on { background: rgba(148,188,227,.9); border-color: transparent; }
 .cam-btn.flash-on svg { stroke: #0d0f10; }
-#ratio-btn { height: 40px; padding: 0 11px; border-radius: 12px; font: 600 12.5px var(--mono); }
+#ratio-btn { height: 44px; padding: 0 11px; border-radius: 12px; font: 600 12.5px var(--mono); flex: none; }
 #gps-chip {
-  position: absolute; left: 12px; display: flex; align-items: center; gap: 7px; height: 30px; padding: 0 11px; border-radius: 9px; z-index: 40;
+  position: absolute; left: 12px; top: calc(var(--safe-top) + 10px); display: flex; align-items: center; gap: 7px; height: 30px; padding: 0 11px; border-radius: 9px; z-index: 40;
   font: 500 12px var(--mono); color: #e8f2ea;
 }
 #gps-chip svg { stroke: var(--ok); }
@@ -227,10 +228,10 @@ svg { display: block; }
 #flash-fx { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 45; }
 #flash-fx.go { animation: flashfx .22s ease-out; }
 @keyframes flashfx { 0% { opacity: .85; } 100% { opacity: 0; } }
-#cam-banner { position: absolute; left: 12px; right: 12px; z-index: 41; }
+#cam-banner { position: absolute; left: 12px; right: 12px; top: calc(var(--safe-top) + 50px); z-index: 41; }
 #cam-banner .banner { background: rgba(20,23,26,.82); border-color: rgba(255,255,255,.12); color: #fff; margin: 0; }
 #cam-banner .banner .d { color: rgba(255,255,255,.7); }
-#rec-timer { position: absolute; left: 50%; transform: translateX(-50%); font: 600 13px var(--mono); color: #fff; background: rgba(193,88,78,.9); padding: 5px 10px; border-radius: 8px; z-index: 41; }
+#rec-timer { position: absolute; left: 50%; top: calc(var(--safe-top) + 12px); transform: translateX(-50%); font: 600 13px var(--mono); color: #fff; background: rgba(193,88,78,.9); padding: 5px 10px; border-radius: 8px; z-index: 41; }
 
 /* watermark card (DOM version, mirrors canvas renderer) */
 .wm {
